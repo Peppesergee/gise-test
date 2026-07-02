@@ -4,9 +4,9 @@ import { colors } from '../theme/colors';
 import { FeedbackValue, Suggestion } from '../types';
 
 const KIND_META: Record<Suggestion['kind'], { emoji: string; label: string; color: string; bg: string }> = {
-  consigliata: { emoji: '⭐', label: 'Ti consiglio', color: colors.recommended, bg: colors.recommendedBg },
-  alternativa: { emoji: '🔁', label: 'In alternativa', color: colors.alternative, bg: colors.alternativeBg },
-  niente: { emoji: '🌿', label: 'Oppure', color: colors.doNothing, bg: colors.doNothingBg },
+  consigliata: { emoji: '⭐', label: 'Ti consiglio', color: colors.recommended, bg: colors.recommendedMuted },
+  alternativa: { emoji: '🔁', label: 'In alternativa', color: colors.alternative, bg: colors.alternativeMuted },
+  niente: { emoji: '🌿', label: 'Oppure', color: colors.doNothing, bg: colors.doNothingMuted },
 };
 
 interface SuggestionCardProps {
@@ -19,10 +19,12 @@ export function SuggestionCard({ suggestion, feedback, onFeedback }: SuggestionC
   const meta = KIND_META[suggestion.kind];
 
   return (
-    <View style={[styles.card, { backgroundColor: meta.bg, borderColor: meta.color }]}>
-      <Text style={[styles.kindLabel, { color: meta.color }]}>
-        {meta.emoji} {meta.label}
-      </Text>
+    <View style={styles.card}>
+      <View style={[styles.kindTag, { backgroundColor: meta.bg }]}>
+        <Text style={[styles.kindLabel, { color: meta.color }]}>
+          {meta.emoji} {meta.label}
+        </Text>
+      </View>
       <Text style={styles.title}>{suggestion.title}</Text>
       <Text style={styles.description}>{suggestion.description}</Text>
       <View style={styles.actions}>
@@ -34,9 +36,9 @@ export function SuggestionCard({ suggestion, feedback, onFeedback }: SuggestionC
         </Pressable>
         <Pressable
           onPress={() => onFeedback('saltato')}
-          style={[styles.actionButton, feedback === 'saltato' && styles.actionButtonActive]}
+          style={[styles.actionButton, feedback === 'saltato' && styles.actionButtonMuted]}
         >
-          <Text style={[styles.actionText, feedback === 'saltato' && styles.actionTextActive]}>👎 Non fa per me</Text>
+          <Text style={[styles.actionText, feedback === 'saltato' && styles.actionTextMuted]}>👎 Non fa per me</Text>
         </Pressable>
       </View>
     </View>
@@ -45,16 +47,21 @@ export function SuggestionCard({ suggestion, feedback, onFeedback }: SuggestionC
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    borderWidth: 1.5,
-    padding: 16,
+    borderRadius: 18,
+    backgroundColor: colors.surface,
+    padding: 18,
     marginBottom: 12,
   },
+  kindTag: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 10,
+  },
   kindLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    textTransform: 'uppercase',
-    marginBottom: 6,
   },
   title: {
     fontSize: 17,
@@ -70,23 +77,29 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: 8,
-    marginTop: 12,
+    marginTop: 14,
   },
   actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    backgroundColor: colors.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: colors.chip,
   },
   actionButtonActive: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.accentGreen,
+  },
+  actionButtonMuted: {
+    backgroundColor: colors.surfaceRaised,
   },
   actionText: {
     fontSize: 13,
-    color: colors.text,
+    color: colors.textMuted,
     fontWeight: '600',
   },
   actionTextActive: {
-    color: '#FFFFFF',
+    color: '#04170A',
+  },
+  actionTextMuted: {
+    color: colors.text,
   },
 });

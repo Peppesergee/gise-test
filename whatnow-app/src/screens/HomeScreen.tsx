@@ -86,22 +86,20 @@ export function HomeScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.appTitle}>🧠 WhatNow?</Text>
+        <Text style={styles.appTitle}>WhatNow?</Text>
         <Text style={styles.tagline}>Non decidere. Chiedi.</Text>
 
         {permission !== 'granted' ? (
-          <Pressable style={styles.locationBanner} onPress={requestPermission}>
-            <Text style={styles.locationBannerText}>
-              📍 Attiva la posizione per suggerimenti basati anche sul meteo del momento
-            </Text>
+          <Pressable style={styles.pillRow} onPress={requestPermission}>
+            <Text style={styles.pillRowText}>📍 Attiva la posizione per il meteo del momento</Text>
           </Pressable>
         ) : weatherLoading ? (
-          <View style={styles.locationBanner}>
-            <ActivityIndicator color={colors.primary} />
+          <View style={styles.pillRow}>
+            <ActivityIndicator color={colors.textMuted} />
           </View>
         ) : weather ? (
-          <View style={styles.locationBanner}>
-            <Text style={styles.locationBannerText}>
+          <View style={styles.pillRow}>
+            <Text style={styles.pillRowText}>
               {weatherInfo?.emoji} {weatherInfo?.label}
               {weather.temperatureC != null ? `, ${weather.temperatureC}°C` : ''}
               {weather.locationLabel ? ` · ${weather.locationLabel}` : ''}
@@ -109,21 +107,21 @@ export function HomeScreen() {
           </View>
         ) : null}
 
-        <Text style={styles.label}>Come stai? Cosa hai in mente?</Text>
+        <Text style={styles.sectionLabel}>Come stai? Cosa hai in mente?</Text>
         <TextInput
           style={styles.textArea}
           placeholder={'Es. "ho 2 ore libere, sono stanco, piove"'}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.textFaint}
           value={freeText}
           onChangeText={setFreeText}
           multiline
           numberOfLines={3}
         />
 
-        <Text style={styles.label}>Energia (opzionale)</Text>
+        <Text style={[styles.sectionLabel, styles.labelSpaced]}>Energia</Text>
         <ChipGroup options={ENERGY_OPTIONS} value={energy} onChange={setEnergy} />
 
-        <Text style={[styles.label, styles.labelSpaced]}>Tempo libero (opzionale)</Text>
+        <Text style={[styles.sectionLabel, styles.labelSpaced]}>Tempo libero</Text>
         <ChipGroup
           options={TIME_BUDGET_OPTIONS.map((o) => ({ value: o.minutes, label: o.label }))}
           value={timeBudgetMinutes}
@@ -136,7 +134,7 @@ export function HomeScreen() {
           onPress={handleSubmit}
         >
           {submitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#04170A" />
           ) : (
             <Text style={styles.buttonText}>Dimmi cosa fare</Text>
           )}
@@ -176,69 +174,67 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingTop: 24,
     paddingBottom: 40,
   },
   appTitle: {
-    fontSize: 28,
+    fontSize: 34,
     fontWeight: '800',
     color: colors.text,
-    textAlign: 'center',
+    letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textMuted,
-    textAlign: 'center',
+    marginTop: 2,
     marginBottom: 20,
   },
-  locationBanner: {
+  pillRow: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 18,
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 20,
     alignItems: 'center',
   },
-  locationBannerText: {
+  pillRowText: {
     fontSize: 13,
-    color: colors.text,
+    color: colors.textMuted,
     textAlign: 'center',
   },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 10,
   },
   labelSpaced: {
-    marginTop: 16,
+    marginTop: 20,
   },
   textArea: {
     backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
     fontSize: 15,
     color: colors.text,
-    minHeight: 80,
+    minHeight: 84,
     textAlignVertical: 'top',
-    marginBottom: 4,
   },
   button: {
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    paddingVertical: 15,
+    backgroundColor: colors.accentGreen,
+    borderRadius: 999,
+    paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 28,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: '#04170A',
     fontWeight: '700',
     fontSize: 16,
   },
@@ -247,7 +243,7 @@ const styles = StyleSheet.create({
   },
   sourceLabel: {
     fontSize: 12,
-    color: colors.textMuted,
+    color: colors.textFaint,
     textAlign: 'center',
     marginTop: 4,
   },

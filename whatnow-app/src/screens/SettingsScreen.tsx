@@ -8,6 +8,14 @@ import { WEATHER_LABELS } from '../utils/weatherLabels';
 
 const aiConfigured = Boolean(process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY);
 
+function SectionHeader({ title }: { title: string }) {
+  return <Text style={styles.sectionTitle}>{title}</Text>;
+}
+
+function Row({ children, last }: { children: React.ReactNode; last?: boolean }) {
+  return <View style={[styles.row, !last && styles.rowDivider]}>{children}</View>;
+}
+
 export function SettingsScreen() {
   const { coords, permission, requestPermission } = useUserLocation();
   const { weather } = useWeather(coords);
@@ -30,62 +38,80 @@ export function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>Posizione e meteo</Text>
-      <View style={styles.card}>
-        <Text style={styles.rowText}>
-          Permesso posizione: <Text style={styles.bold}>{permission}</Text>
-        </Text>
+      <Text style={styles.headerTitle}>Impostazioni</Text>
+
+      <SectionHeader title="Posizione e meteo" />
+      <View style={styles.group}>
+        <Row>
+          <Text style={styles.rowText}>Permesso posizione</Text>
+          <Text style={styles.rowValue}>{permission}</Text>
+        </Row>
         {weather && (
-          <Text style={styles.rowText}>
-            Meteo rilevato: {weatherInfo?.emoji} {weatherInfo?.label}
-            {weather.temperatureC != null ? `, ${weather.temperatureC}°C` : ''}
-            {weather.locationLabel ? ` · ${weather.locationLabel}` : ''}
-          </Text>
+          <Row>
+            <Text style={styles.rowText}>Meteo rilevato</Text>
+            <Text style={styles.rowValue}>
+              {weatherInfo?.emoji} {weatherInfo?.label}
+              {weather.temperatureC != null ? `, ${weather.temperatureC}°C` : ''}
+            </Text>
+          </Row>
         )}
         {permission !== 'granted' && (
-          <Pressable style={styles.smallButton} onPress={requestPermission}>
-            <Text style={styles.smallButtonText}>Attiva posizione</Text>
-          </Pressable>
+          <Row last>
+            <Pressable onPress={requestPermission}>
+              <Text style={styles.actionLink}>Attiva posizione</Text>
+            </Pressable>
+          </Row>
         )}
       </View>
 
-      <Text style={styles.sectionTitle}>Abitudini imparate</Text>
-      <View style={styles.card}>
-        <Text style={styles.rowText}>Feedback raccolti finora: {habits.totalFeedback}</Text>
+      <SectionHeader title="Abitudini imparate" />
+      <View style={styles.group}>
+        <Row last={likedCategories.length === 0 && dislikedCategories.length === 0}>
+          <Text style={styles.rowText}>Feedback raccolti finora</Text>
+          <Text style={styles.rowValue}>{habits.totalFeedback}</Text>
+        </Row>
         {likedCategories.length > 0 && (
-          <Text style={styles.rowText}>Categorie che apprezzi: {likedCategories.map(([c]) => c).join(', ')}</Text>
+          <Row last={dislikedCategories.length === 0}>
+            <Text style={styles.rowText}>Categorie che apprezzi</Text>
+            <Text style={styles.rowValue}>{likedCategories.map(([c]) => c).join(', ')}</Text>
+          </Row>
         )}
         {dislikedCategories.length > 0 && (
-          <Text style={styles.rowText}>Categorie che eviti: {dislikedCategories.map(([c]) => c).join(', ')}</Text>
+          <Row last>
+            <Text style={styles.rowText}>Categorie che eviti</Text>
+            <Text style={styles.rowValue}>{dislikedCategories.map(([c]) => c).join(', ')}</Text>
+          </Row>
         )}
         {habits.totalFeedback === 0 && (
-          <Text style={styles.rowTextMuted}>
+          <Text style={styles.groupNote}>
             Ancora nessun dato: lascia un feedback (✅/👎) sui suggerimenti per affinarli nel tempo.
           </Text>
         )}
       </View>
 
-      <Text style={styles.sectionTitle}>Motore dei suggerimenti</Text>
-      <View style={styles.card}>
-        <Text style={styles.rowText}>
+      <SectionHeader title="Motore dei suggerimenti" />
+      <View style={styles.group}>
+        <Row last>
+          <Text style={styles.rowText}>
+            {aiConfigured ? '✨ AI (Claude) attiva' : '⚙️ Motore a regole locale'}
+          </Text>
+        </Row>
+        <Text style={styles.groupNote}>
           {aiConfigured
-            ? '✨ Chiave AI configurata: i suggerimenti vengono generati da Claude.'
-            : '⚙️ Nessuna chiave AI configurata: i suggerimenti vengono generati da un motore a regole locale (funziona comunque, zero setup).'}
-        </Text>
-        <Text style={styles.rowTextMuted}>
-          Per abilitare l’AI, imposta EXPO_PUBLIC_ANTHROPIC_API_KEY in un file .env (vedi .env.example).
-          Nota: in questo prototipo la chiave viene usata direttamente dal telefono/browser; per un uso in
-          produzione andrebbe instradata tramite un backend che non la esponga mai al dispositivo.
+            ? 'I suggerimenti vengono generati da Claude, con fallback automatico alle regole in caso di errore.'
+            : 'Nessuna chiave AI configurata: funziona comunque, zero setup. Per abilitare l’AI imposta EXPO_PUBLIC_ANTHROPIC_API_KEY in un file .env (vedi .env.example).'}
+          {' '}Nota: in questo prototipo la chiave viene usata direttamente dal dispositivo; per un uso in
+          produzione andrebbe instradata tramite un backend che non la esponga mai.
         </Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Dati e privacy</Text>
-      <View style={styles.card}>
-        <Text style={styles.rowTextMuted}>
+      <SectionHeader title="Dati e privacy" />
+      <View style={styles.group}>
+        <Text style={styles.groupNote}>
           Storico e abitudini restano solo su questo dispositivo. Non c’è account né sincronizzazione.
         </Text>
-        <Pressable style={styles.dangerButton} onPress={confirmReset}>
-          <Text style={styles.dangerButtonText}>Reimposta abitudini e storico</Text>
+        <Pressable style={styles.dangerRow} onPress={confirmReset}>
+          <Text style={styles.dangerText}>Reimposta abitudini e storico</Text>
         </Pressable>
       </View>
     </ScrollView>
@@ -98,63 +124,75 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    padding: 20,
     paddingBottom: 40,
   },
+  headerTitle: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: colors.text,
+    letterSpacing: -0.5,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 8,
+  },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: colors.textMuted,
     textTransform: 'uppercase',
-    marginTop: 20,
+    letterSpacing: 0.4,
+    marginTop: 24,
     marginBottom: 8,
+    paddingHorizontal: 20,
   },
-  card: {
+  group: {
     backgroundColor: colors.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
+    marginHorizontal: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  rowDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   rowText: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.text,
-    marginBottom: 6,
-    lineHeight: 20,
   },
-  rowTextMuted: {
+  rowValue: {
+    fontSize: 14,
+    color: colors.textMuted,
+    flexShrink: 1,
+    textAlign: 'right',
+    marginLeft: 12,
+  },
+  actionLink: {
+    fontSize: 15,
+    color: colors.accentGreen,
+    fontWeight: '600',
+  },
+  groupNote: {
     fontSize: 13,
     color: colors.textMuted,
     lineHeight: 18,
+    padding: 16,
   },
-  bold: {
-    fontWeight: '700',
+  dangerRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
-  smallButton: {
-    marginTop: 8,
-    alignSelf: 'flex-start',
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  smallButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  dangerButton: {
-    marginTop: 12,
-    alignSelf: 'flex-start',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: colors.danger,
-  },
-  dangerButtonText: {
+  dangerText: {
+    fontSize: 15,
     color: colors.danger,
     fontWeight: '600',
-    fontSize: 13,
   },
 });

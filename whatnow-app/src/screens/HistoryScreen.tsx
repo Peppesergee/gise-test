@@ -2,40 +2,64 @@ import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useHabits } from '../hooks/useHabits';
 import { colors } from '../theme/colors';
-import { HistoryEntry } from '../types';
+import { ActivityCategory, HistoryEntry } from '../types';
 import { WEATHER_LABELS } from '../utils/weatherLabels';
 
-const CHOSEN_LABEL: Record<NonNullable<HistoryEntry['chosen']>, string> = {
-  consigliata: '⭐ Ha seguito il consiglio principale',
-  alternativa: '🔁 Ha seguito l’alternativa',
-  niente: '🌿 Ha scelto di non fare niente',
+const CATEGORY_EMOJI: Record<ActivityCategory, string> = {
+  relax: '🛋️',
+  movimento: '🏃',
+  sociale: '💬',
+  creativo: '🎨',
+  commissioni: '🧹',
+  intrattenimento: '🎬',
+  natura: '🌳',
+  cibo: '🍽️',
 };
 
-function formatDate(timestamp: number): string {
+const CHOSEN_META: Record<NonNullable<HistoryEntry['chosen']>, { label: string; color: string }> = {
+  consigliata: { label: 'Consiglio seguito', color: colors.recommended },
+  alternativa: { label: 'Alternativa seguita', color: colors.alternative },
+  niente: { label: 'Non fatto niente', color: colors.doNothing },
+};
+
+function formatTime(timestamp: number): string {
   const date = new Date(timestamp);
-  return date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }) +
-    ' · ' +
-    date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const isToday = new Date().toDateString() === date.toDateString();
+  if (isToday) return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
 }
 
-function HistoryCard({ entry }: { entry: HistoryEntry }) {
+function HistoryRow({ entry }: { entry: HistoryEntry }) {
+  const emoji = entry.result.recommended.category ? CATEGORY_EMOJI[entry.result.recommended.category] : '🧠';
   const weatherInfo = entry.weatherCondition ? WEATHER_LABELS[entry.weatherCondition] : null;
+  const chosenMeta = entry.chosen ? CHOSEN_META[entry.chosen] : null;
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.date}>{formatDate(entry.createdAt)}</Text>
-      {entry.freeText ? <Text style={styles.freeText}>“{entry.freeText}”</Text> : null}
-      <View style={styles.metaRow}>
-        {entry.energy && <Text style={styles.metaChip}>{entry.energy}</Text>}
-        {entry.timeBudgetMinutes != null && <Text style={styles.metaChip}>{entry.timeBudgetMinutes} min</Text>}
-        {weatherInfo && <Text style={styles.metaChip}>{weatherInfo.emoji} {weatherInfo.label}</Text>}
+    <View style={styles.row}>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarEmoji}>{emoji}</Text>
       </View>
-      <Text style={styles.recommended}>⭐ {entry.result.recommended.title}</Text>
-      {entry.chosen ? (
-        <Text style={styles.outcome}>{CHOSEN_LABEL[entry.chosen]}</Text>
-      ) : (
-        <Text style={styles.outcomePending}>Nessun feedback lasciato</Text>
-      )}
+      <View style={styles.rowBody}>
+        <Text style={styles.rowTitle} numberOfLines={1}>
+          {entry.freeText ? entry.freeText : entry.result.recommended.title}
+        </Text>
+        <Text style={styles.rowSubtitle} numberOfLines={1}>
+          ⭐ {entry.result.recommended.title}
+        </Text>
+        <View style={styles.metaRow}>
+          {entry.energy && <Text style={styles.metaText}>{entry.energy}</Text>}
+          {entry.timeBudgetMinutes != null && <Text style={styles.metaText}>· {entry.timeBudgetMinutes} min</Text>}
+          {weatherInfo && <Text style={styles.metaText}>· {weatherInfo.emoji} {weatherInfo.label}</Text>}
+        </View>
+      </View>
+      <View style={styles.rowMeta}>
+        <Text style={styles.time}>{formatTime(entry.createdAt)}</Text>
+        {chosenMeta ? (
+          <Text style={[styles.outcome, { color: chosenMeta.color }]}>{chosenMeta.label}</Text>
+        ) : (
+          <Text style={styles.outcomePending}>In sospeso</Text>
+        )}
+      </View>
     </View>
   );
 }
@@ -43,83 +67,114 @@ function HistoryCard({ entry }: { entry: HistoryEntry }) {
 export function HistoryScreen() {
   const { history, loading } = useHabits();
 
-  if (loading) return null;
+  if (loading) return <View style={styles.container} />;
 
   if (history.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyEmoji}>🗒️</Text>
-        <Text style={styles.emptyText}>Le decisioni che chiedi a WhatNow? finiranno qui.</Text>
+      <View style={styles.container}>
+        <Text style={styles.headerTitle}>Storico</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyEmoji}>🗒️</Text>
+          <Text style={styles.emptyText}>Le decisioni che chiedi a WhatNow? finiranno qui.</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <FlatList
-      data={history}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.list}
-      renderItem={({ item }) => <HistoryCard entry={item} />}
-    />
+    <View style={styles.container}>
+      <Text style={styles.headerTitle}>Storico</Text>
+      <FlatList
+        data={history}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        renderItem={({ item }) => <HistoryRow entry={item} />}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  list: {
-    padding: 20,
+  container: {
+    flex: 1,
     backgroundColor: colors.background,
   },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
-    marginBottom: 12,
-  },
-  date: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginBottom: 6,
-  },
-  freeText: {
-    fontSize: 14,
+  headerTitle: {
+    fontSize: 34,
+    fontWeight: '800',
     color: colors.text,
-    fontStyle: 'italic',
-    marginBottom: 8,
+    letterSpacing: -0.5,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 12,
+  },
+  list: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginLeft: 60,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 14,
+    gap: 12,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarEmoji: {
+    fontSize: 20,
+  },
+  rowBody: {
+    flex: 1,
+  },
+  rowTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  rowSubtitle: {
+    fontSize: 14,
+    color: colors.textMuted,
+    marginBottom: 4,
   },
   metaRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 8,
+    gap: 4,
   },
-  metaChip: {
+  metaText: {
     fontSize: 12,
-    color: colors.textMuted,
-    backgroundColor: colors.background,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
+    color: colors.textFaint,
   },
-  recommended: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 4,
+  rowMeta: {
+    alignItems: 'flex-end',
+  },
+  time: {
+    fontSize: 13,
+    color: colors.textFaint,
+    marginBottom: 6,
   },
   outcome: {
-    fontSize: 13,
-    color: colors.primary,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
   },
   outcomePending: {
-    fontSize: 13,
-    color: colors.textMuted,
+    fontSize: 12,
+    color: colors.textFaint,
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,

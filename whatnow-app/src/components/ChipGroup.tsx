@@ -39,23 +39,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: colors.chip,
   },
   chipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: colors.accentGreen,
   },
   chipText: {
-    color: colors.text,
+    color: colors.textMuted,
     fontSize: 14,
+    fontWeight: '600',
   },
   chipTextSelected: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: '#04170A',
+    fontWeight: '700',
   },
 });
