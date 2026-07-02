@@ -6,7 +6,7 @@ import { useWeather } from '../hooks/useWeather';
 import { colors } from '../theme/colors';
 import { WEATHER_LABELS } from '../utils/weatherLabels';
 
-const aiConfigured = Boolean(process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY);
+const aiConfigured = Boolean(process.env.EXPO_PUBLIC_WHATNOW_API_URL);
 
 function SectionHeader({ title }: { title: string }) {
   return <Text style={styles.sectionTitle}>{title}</Text>;
@@ -93,15 +93,13 @@ export function SettingsScreen() {
       <View style={styles.group}>
         <Row last>
           <Text style={styles.rowText}>
-            {aiConfigured ? '✨ AI (Claude) attiva' : '⚙️ Motore a regole locale'}
+            {aiConfigured ? '✨ AI attiva (backend proprio)' : '⚙️ Motore a regole locale'}
           </Text>
         </Row>
         <Text style={styles.groupNote}>
           {aiConfigured
-            ? 'I suggerimenti vengono generati da Claude, con fallback automatico alle regole in caso di errore.'
-            : 'Nessuna chiave AI configurata: funziona comunque, zero setup. Per abilitare l’AI imposta EXPO_PUBLIC_ANTHROPIC_API_KEY in un file .env (vedi .env.example).'}
-          {' '}Nota: in questo prototipo la chiave viene usata direttamente dal dispositivo; per un uso in
-          produzione andrebbe instradata tramite un backend che non la esponga mai.
+            ? 'I suggerimenti vengono generati da un modello open source tramite il backend whatnow-worker, con fallback automatico alle regole in caso di errore. Nessuna chiave è presente in questa app.'
+            : 'Nessun backend AI configurato: funziona comunque, zero setup e zero costi. Per abilitarlo, distribuisci whatnow-worker (vedi README) e imposta EXPO_PUBLIC_WHATNOW_API_URL in un file .env.'}
         </Text>
       </View>
 

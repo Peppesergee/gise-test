@@ -28,14 +28,15 @@ L'app funziona **a zero setup**: senza alcuna configurazione usa un motore a reg
 combina meteo, energia, tempo disponibile e abitudini per scegliere tra un catalogo di attività
 (o di idee per mangiare) e generare i tre suggerimenti.
 
-Se imposti `EXPO_PUBLIC_ANTHROPIC_API_KEY` (vedi `.env.example`), l'app chiama invece direttamente
-l'API di Claude per generare suggerimenti più naturali e su misura, con fallback automatico al
-motore a regole in caso di errore o rete assente.
+Se imposti `EXPO_PUBLIC_WHATNOW_API_URL` (vedi `.env.example`), l'app chiama invece il backend
+[`whatnow-worker`](../whatnow-worker) per generare suggerimenti più naturali e su misura, con
+fallback automatico al motore a regole in caso di errore o rete assente.
 
-⚠️ **Nota di sicurezza**: in questo prototipo la chiave AI viene usata direttamente dal
-client (telefono o browser). È comodo per una demo, ma **non adatto alla produzione**: chiunque
-analizzi il traffico o decompili l'app può leggere la chiave. Per un rilascio reale, sposta la
-chiamata a Claude dietro un backend/proxy che tenga la chiave lato server.
+✅ **Nessuna chiave nell'app**: a differenza di un'integrazione AI "diretta dal client", qui
+l'app conosce solo l'URL pubblico del proprio backend (non un segreto). Il backend è un
+Cloudflare Worker gratuito che usa un modello open source (Cloudflare Workers AI), non un
+account Anthropic/Claude personale — vedi [`whatnow-worker/README.md`](../whatnow-worker/README.md)
+per il deploy (pochi minuti, nessun costo).
 
 ## Sviluppo
 
@@ -45,16 +46,18 @@ npm run start   # oppure npm run ios / npm run android / npm run web
 npm run typecheck
 ```
 
-Copia `.env.example` in `.env` solo se vuoi abilitare l'AI; altrimenti l'app funziona subito
-così com'è.
+Copia `.env.example` in `.env` solo se vuoi abilitare l'AI (dopo aver distribuito
+`whatnow-worker`); altrimenti l'app funziona subito così com'è.
 
 ## Struttura
 
 - `src/services/decisionEngine.ts` — orchestratore: analizza il testo libero, prova l'AI (se
-  configurata) e ricade sul motore a regole.
+  `EXPO_PUBLIC_WHATNOW_API_URL` è configurato) e ricade sul motore a regole.
 - `src/services/ruleEngine.ts` — motore a regole locale (attività, cibo, acquisti, risposte).
-- `src/services/aiEngine.ts` — chiamata opzionale a Claude.
+- `src/services/aiEngine.ts` — chiamata opzionale al backend `whatnow-worker`.
 - `src/services/textParser.ts` — riconoscimento leggero di dominio/energia/tempo/meteo dal testo.
 - `src/data/habitsStore.ts` — persistenza locale di abitudini e storico (AsyncStorage).
 - `src/hooks/useUserLocation.ts`, `src/hooks/useWeather.ts` — posizione e meteo.
 - `src/screens/` — Ora (input + suggerimenti), Storico, Impostazioni.
+
+Il backend AI vive in un progetto separato: [`../whatnow-worker`](../whatnow-worker).
