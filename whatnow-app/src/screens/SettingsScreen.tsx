@@ -89,20 +89,6 @@ export function SettingsScreen() {
         )}
       </View>
 
-      <SectionHeader title="Motore dei suggerimenti" />
-      <View style={styles.group}>
-        <Row last>
-          <Text style={styles.rowText}>
-            {aiConfigured ? '✨ AI attiva (backend proprio)' : '⚙️ Motore a regole locale'}
-          </Text>
-        </Row>
-        <Text style={styles.groupNote}>
-          {aiConfigured
-            ? 'I suggerimenti vengono generati da un modello open source tramite il backend whatnow-worker, con fallback automatico alle regole in caso di errore. Nessuna chiave è presente in questa app.'
-            : 'Nessun backend AI configurato: funziona comunque, zero setup e zero costi. Per abilitarlo, distribuisci whatnow-worker (vedi README) e imposta EXPO_PUBLIC_WHATNOW_API_URL in un file .env.'}
-        </Text>
-      </View>
-
       <SectionHeader title="Dati e privacy" />
       <View style={styles.group}>
         <Text style={styles.groupNote}>

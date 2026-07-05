@@ -66,7 +66,7 @@ export async function recordFeedback(
 }
 
 export async function resetAllData(): Promise<void> {
-  await AsyncStorage.removeMany([HABITS_KEY, HISTORY_KEY]);
+  await AsyncStorage.multiRemove([HABITS_KEY, HISTORY_KEY]);
 }
 
 function clamp(value: number, min: number, max: number): number {

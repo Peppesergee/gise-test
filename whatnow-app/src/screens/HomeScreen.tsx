@@ -157,9 +157,6 @@ export function HomeScreen() {
               feedback={feedbackByKind.niente}
               onFeedback={(f) => handleFeedback('niente', f)}
             />
-            <Text style={styles.sourceLabel}>
-              {result.source === 'ai' ? '✨ Generato dall’AI' : '⚙️ Motore a regole locale'}
-            </Text>
           </View>
         )}
       </ScrollView>

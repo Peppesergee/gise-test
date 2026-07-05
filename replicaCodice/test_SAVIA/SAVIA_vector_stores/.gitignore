@@ -1,5 +1,0 @@
-*.logs
-.ipynb_checkpoints
-!.gitkeep
-__pycache__/
-*.faiss
