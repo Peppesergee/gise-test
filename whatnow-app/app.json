@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "WhatNow?",
+    "slug": "whatnow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "WhatNow? usa la tua posizione per leggere il meteo del momento e darti suggerimenti più utili."
+      }
+    },
+    "android": {
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["ACCESS_COARSE_LOCATION"]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "WhatNow? usa la tua posizione per leggere il meteo del momento e darti suggerimenti più utili."
+        }
+      ]
+    ]
+  }
+}
